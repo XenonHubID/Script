@@ -2,22 +2,20 @@ getgenv().LPH_NO_VIRTUALIZE = function(f) return f end
 local request = (syn and syn.request) or (http and http.request) or http_request or (fluxus and fluxus.request) or request
 local queue_on_teleport = queue_on_teleport or syn.queue_on_teleport
 
---/// 1. SERVICES \\\--
-local Players          = game:GetService("Players")
-local RS               = game:GetService("ReplicatedStorage")
-local RunService       = game:GetService("RunService")
-local CoreGui          = game:GetService("CoreGui")
-local HttpService      = game:GetService("HttpService")
-local TeleportService  = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
-local TweenService     = game:GetService("TweenService")
-local Workspace        = game:GetService("Workspace")
-local VirtualUser      = game:GetService("VirtualUser")
-local LocalPlayer      = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local Workspace = game:GetService("Workspace")
+local VirtualUser = game:GetService("VirtualUser")
+local LocalPlayer = Players.LocalPlayer
 
--- Global State & Config Defaults
 _G.AutoFish = false
-_G.DelaySpeed = 0.5 -- Default Delay
+_G.DelaySpeed = 0.5
 _G.AutoSell = false
 _G.SellDelay = 30
 _G.AutoEnchant = false
@@ -34,12 +32,10 @@ local GlobalData = {
     Dependencies = {} 
 }
 
--- Safe GUI Parent
 local function getUI()
     return (getgenv().gethui and getgenv().gethui()) or CoreGui:FindFirstChild("RobloxGui") or CoreGui
 end
 
---/// 2. LOAD UI LIBRARY \\\--
 local success, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 end)
@@ -53,7 +49,6 @@ if not success or not WindUI then
     return
 end
 
---/// 3. NOTIFICATION SYSTEM \\\--
 local NotifGui = Instance.new("ScreenGui")
 NotifGui.Name = "XenonNotifs"
 NotifGui.Parent = getUI()
@@ -106,7 +101,6 @@ function Notify(Title, Text, Duration)
     end)
 end
 
---/// 4. WINDOW & DATA LOADER \\\--
 local Window = WindUI:CreateWindow({
     Title = "XENON HUB",
     Icon = "rbxassetid://130982330871305",
@@ -141,7 +135,6 @@ ButtonResize.MouseButton1Click:Connect(function()
     windowVisible = not windowVisible
 end)
 
--- Loader Script
 task.spawn(function()
     Notify("Loader", "Injecting dependencies...", 2)
     local s, e = pcall(function()
@@ -186,7 +179,6 @@ end)
 local function safeFire(name, ...) if GlobalData.Loaded and GlobalData.Remotes[name] then GlobalData.Remotes[name]:FireServer(...) end end
 local function safeInvoke(name, ...) if GlobalData.Loaded and GlobalData.Remotes[name] then return GlobalData.Remotes[name]:InvokeServer(...) end end
 
---/// 5. CORE LOGIC: NEW INSTANT FISHING V9 \\\--
 local function RunInstantFishing()
     task.spawn(function()
         while _G.AutoFish do
@@ -195,7 +187,6 @@ local function RunInstantFishing()
             
             local currentTime = tick()
             
-            -- 1. Charge Rod (With time argument bypass)
             pcall(function()
                 if GlobalData.Remotes.Charge then
                     GlobalData.Remotes.Charge:InvokeServer(nil, nil, currentTime)
@@ -204,7 +195,6 @@ local function RunInstantFishing()
             
             task.wait(0.1) 
             
-            -- 2. Start Minigame (Constant Bypass)
             local constantVal = -1.233184814453125
             local randomPower = math.random(80, 95) / 100 
             
@@ -215,10 +205,8 @@ local function RunInstantFishing()
             end)
             
             if successStart then
-                -- 3. Humanized Delay (Prevent Kick)
                 task.wait(_G.DelaySpeed)
                 
-                -- 4. Finish / Catch
                 pcall(function()
                     if GlobalData.Remotes.FinishFunction then
                         GlobalData.Remotes.FinishFunction:InvokeServer()
@@ -227,20 +215,17 @@ local function RunInstantFishing()
                     end
                 end)
             else
-                -- Retry logic if start failed
                 task.wait(0.2)
             end
         end
     end)
 end
 
---/// 6. TAB 1: INFORMATION \\\--
 local Tab1 = Window:Tab({ Title = "Info", Icon = "info" })
 Tab1:Section({ Title = "Status", Icon = "activity" })
 Tab1:Paragraph({ Title = "Version", Desc = "XenonHUB (Instant Ready)" })
 Tab1:Button({ Title = "Copy Discord", Callback = function() setclipboard("https://discord.gg/MtzH9fttbs") Notify("Discord", "Copied!", 2) end })
 
---/// 7. TAB 2: FISHING (REMAKED V9 - STRICT UI) \\\--
 local Tab2 = Window:Tab({ Title = "Fishing", Icon = "anchor" })
 
 Tab2:Section({ Title = "Instant Fishing", Icon = "zap" })
@@ -250,7 +235,6 @@ Tab2:Toggle({
     Callback = function(v) if v then safeFire("EquipRod", 1) end end
 })
 
--- UI BARU: Checkbox + Input Only (SESUAI REQUEST)
 Tab2:Toggle({
     Title = "Auto Fish (Instant)",
     Callback = function(v)
@@ -277,10 +261,8 @@ Tab2:Input({
     end
 })
 
---/// 8. TAB 3: AUTOMATION \\\--
 local Tab3 = Window:Tab({ Title = "Automation", Icon = "cpu" })
 
--- SELLING
 Tab3:Section({ Title = "Selling", Icon = "coins" })
 Tab3:Toggle({
     Title = "Auto Sell All",
@@ -298,7 +280,6 @@ Tab3:Toggle({
 })
 Tab3:Input({ Title = "Sell Delay (s)", Default = "30", Callback = function(v) _G.SellDelay = tonumber(v) or 30 end })
 
--- AUTO FAVORITE (RESTORED FROM YOUR CODE)
 Tab3:Section({ Title = "Auto Favorite", Icon = "star" })
 local favRarities = {}
 local autoFav = false
@@ -357,7 +338,6 @@ Tab3:Button({
     end
 })
 
--- AUTO ENCHANT
 Tab3:Section({ Title = "Enchanting", Icon = "flask-conical" })
 local enchantNames = { "Big Hunter 1", "Cursed 1", "Empowered 1", "Glistening 1", "Gold Digger 1", "Leprechaun 1", "Mutation Hunter 1", "Prismatic 1", "Reeler 1", "Stargazer 1", "Stormhunter 1", "XPerienced 1" }
 local enchantIdMap = { ["Big Hunter 1"]=3, ["Cursed 1"]=12, ["Empowered 1"]=9, ["Glistening 1"]=1, ["Gold Digger 1"]=4, ["Leprechaun 1"]=5, ["Mutation Hunter 1"]=7, ["Prismatic 1"]=13, ["Reeler 1"]=2, ["Stargazer 1"]=8, ["Stormhunter 1"]=11, ["XPerienced 1"]=10 }
@@ -415,7 +395,6 @@ Tab3:Toggle({
     end
 })
 
--- EVENT & MAZE
 Tab3:Section({ Title = "Events", Icon = "calendar" })
 Tab3:Toggle({
     Title = "Auto Claim Chest",
@@ -437,7 +416,6 @@ Tab3:Button({
     end
 })
 
---/// 9. TAB 4: PLAYERS \\\--
 local Tab4 = Window:Tab({ Title = "Players", Icon = "user" })
 Tab4:Slider({ Title = "Walk Speed", Value = {Min=16, Max=100, Default=16}, Callback = function(v) 
     _G.CustomSpeed = v 
@@ -454,7 +432,6 @@ UserInputService.JumpRequest:Connect(function()
     end 
 end)
 
--- HIDE IDENTITY
 Tab4:Section({ Title = "Privacy", Icon = "eye-off" })
 _G.FakeName = "XenonHUB"
 Tab4:Input({ Title = "Fake Name", Placeholder = "Name", Callback = function(v) _G.FakeName = v end })
@@ -470,23 +447,19 @@ Tab4:Toggle({ Title = "Hide Identity", Callback = function(v)
     end
 end})
 
---/// 10. TAB 5: SHOP (AUTO BUY) \\\--
 local Tab5 = Window:Tab({ Title = "Shop", Icon = "shopping-cart" })
--- RODS
 local rods = { ["Luck Rod"]=79, ["Carbon Rod"]=76, ["Grass Rod"]=85, ["Demascus Rod"]=77, ["Ice Rod"]=78, ["Lucky Rod"]=4, ["Midnight Rod"]=80, ["Steampunk Rod"]=6, ["Chrome Rod"]=7, ["Astral Rod"]=5, ["Ares Rod"]=126, ["Angler Rod"]=168, ["Bamboo Rod"]=258 }
 local rodNames = {} for k,_ in pairs(rods) do table.insert(rodNames, k) end
 local selRod = rodNames[1]
 Tab5:Dropdown({ Title = "Select Rod", Values = rodNames, Callback = function(v) selRod = v end })
 Tab5:Button({ Title = "Buy Rod", Callback = function() if rods[selRod] then safeInvoke("PurchaseRod", rods[selRod]) Notify("Shop", "Purchased!", 2) end end })
 
--- BAITS
 local baits = { ["TopWater Bait"]=10, ["Lucky Bait"]=2, ["Midnight Bait"]=3, ["Chroma Bait"]=6, ["Dark Mater Bait"]=8, ["Corrupt Bait"]=15, ["Aether Bait"]=16, ["Floral Bait"]=20 }
 local baitNames = {} for k,_ in pairs(baits) do table.insert(baitNames, k) end
 local selBait = baitNames[1]
 Tab5:Dropdown({ Title = "Select Bait", Values = baitNames, Callback = function(v) selBait = v end })
 Tab5:Button({ Title = "Buy Bait", Callback = function() if baits[selBait] then safeInvoke("PurchaseBait", baits[selBait]) Notify("Shop", "Purchased!", 2) end end })
 
--- WEATHER
 local weatherKeyMap = {["Wind"] = "Wind", ["Snow"] = "Snow", ["Cloudy"] = "Cloudy", ["Storm"] = "Storm", ["Radiant"] = "Radiant", ["Shark Hunt"] = "Shark Hunt"}
 local weatherNames = {"Wind", "Snow", "Cloudy", "Storm", "Radiant", "Shark Hunt"}
 local selWeathers = {}
@@ -506,7 +479,6 @@ Tab5:Toggle({ Title = "Auto Buy Weather", Callback = function(v)
     end
 end })
 
---/// 11. TAB 6: TELEPORT \\\--
 local Tab6 = Window:Tab({ Title = "Teleport", Icon = "map-pin" })
 local IslandLocations = {
     ["Ancient Jungle"] = Vector3.new(1518, 1, -186), ["Coral Refs"] = Vector3.new(-2855, 47, 1996),
@@ -524,7 +496,6 @@ local FishingLocations = {
 local FishKeys = {} for k,_ in pairs(FishingLocations) do table.insert(FishKeys, k) end
 Tab6:Dropdown({ Title = "Spots", Values = FishKeys, Callback = function(v) if LocalPlayer.Character then LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(FishingLocations[v]) end end })
 
--- PLAYER TELEPORT
 local function GetPlayerList()
     local list = {} for _, plr in ipairs(Players:GetPlayers()) do if plr ~= LocalPlayer then table.insert(list, plr.Name) end end return list
 end
@@ -536,7 +507,6 @@ Tab6:Button({ Title = "Teleport", Callback = function()
 end })
 Tab6:Button({ Title = "Refresh List", Callback = function() plrDrop:Refresh(GetPlayerList()) end })
 
---/// 12. TAB 7: EXTRA \\\--
 local Tab7 = Window:Tab({ Title = "Extra", Icon = "star" })
 Tab7:Button({ Title = "Unlock Holy Trident", Callback = function()
     local GC = GlobalData.Dependencies.Replion and require(RS.Controllers.GiftingController)
@@ -594,7 +564,6 @@ Tab7:Toggle({
     end
 })
 
---/// 13. TAB 8: SETTINGS \\\--
 local Tab8 = Window:Tab({ Title = "Settings", Icon = "settings" })
 Tab8:Button({ Title = "Server Hop", Callback = function()
     local servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100")).data
@@ -622,7 +591,6 @@ Tab8:Button({ Title = "Load Config", Callback = function()
     end
 end })
 
---/// 14. TAB 9: OTHERS \\\--
 local Tab9 = Window:Tab({ Title = "Others", Icon = "code" })
 Tab9:Button({ Title = "Infinite Yield", Callback = function() loadstring(game:HttpGet('https://raw.githubusercontent.com/DarkNetworks/Infinite-Yield/main/latest.lua'))() end })
 Tab9:Button({ Title = "Fly GUI V3", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))() end })
